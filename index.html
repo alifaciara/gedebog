@@ -20,7 +20,7 @@
       height: 100vh;
     }
 
-    /* Loading Screen */
+    /* ========== Loading ========== */
     #loadingScreen {
       position: fixed;
       inset: 0;
@@ -46,7 +46,7 @@
       to { transform: rotate(360deg); }
     }
 
-    /* Video Mode (fullscreen player) */
+    /* ========== Video Mode ========== */
     #videoMode {
       display: none;
       position: fixed;
@@ -61,7 +61,6 @@
     .video-wrapper {
       position: relative;
       width: 100%;
-      max-width: 100%;
       height: 100%;
       display: flex;
       align-items: center;
@@ -90,8 +89,8 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 72px;
-      height: 72px;
+      width: 78px;
+      height: 78px;
       background: rgba(0,0,0,0.55);
       border: 3px solid #fff;
       border-radius: 50%;
@@ -104,7 +103,7 @@
     }
 
     #playButton:hover {
-      background: rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.18);
       transform: translate(-50%, -50%) scale(1.08);
     }
 
@@ -112,9 +111,9 @@
       content: "";
       width: 0;
       height: 0;
-      border-left: 22px solid #fff;
-      border-top: 14px solid transparent;
-      border-bottom: 14px solid transparent;
+      border-left: 24px solid #fff;
+      border-top: 15px solid transparent;
+      border-bottom: 15px solid transparent;
       margin-left: 6px;
     }
 
@@ -124,7 +123,7 @@
       bottom: 0;
       left: 0;
       right: 0;
-      height: 6px;
+      height: 5px;
       background: rgba(255,255,255,0.2);
       cursor: pointer;
       z-index: 30;
@@ -161,11 +160,100 @@
       background: rgba(255,255,255,0.2);
     }
 
-    /* Noscript warning */
-    #noscriptWarning {
-      display: none;
-      padding: 40px;
-      text-align: center;
+    /* ========== Sidebar Button (kiri) ========== */
+    #sidebarToggle {
+      position: fixed;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 52px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 0 10px 10px 0;
+      cursor: pointer;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s;
+      backdrop-filter: blur(4px);
+    }
+
+    #sidebarToggle:hover {
+      background: rgba(255,255,255,0.22);
+      width: 32px;
+    }
+
+    #sidebarToggle::before {
+      content: "›";
+      color: #fff;
+      font-size: 22px;
+      font-weight: bold;
+      opacity: 0.8;
+    }
+
+    /* ========== Sidebar Panel ========== */
+    #sidebarPanel {
+      position: fixed;
+      top: 0;
+      left: -320px;               /* tersembunyi di kiri */
+      width: 300px;
+      height: 100%;
+      background: rgba(18, 18, 18, 0.97);
+      z-index: 300;
+      transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 8px 0 30px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid rgba(255,255,255,0.08);
+    }
+
+    #sidebarPanel.open {
+      left: 0;
+    }
+
+    .sidebar-header {
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .sidebar-header h3 {
+      font-size: 16px;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    #sidebarClose {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+      opacity: 0.7;
+      line-height: 1;
+      padding: 4px 8px;
+    }
+
+    #sidebarClose:hover {
+      opacity: 1;
+    }
+
+    .sidebar-content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* Tempat kamu isi sendiri nanti */
+    .sidebar-content .placeholder {
+      opacity: 0.5;
+      font-style: italic;
     }
   </style>
 </head>
@@ -175,6 +263,27 @@
   <div id="loadingScreen">
     <div class="spinner"></div>
     <div style="opacity:0.7;font-size:14px;">Memuat...</div>
+  </div>
+
+  <!-- Tombol Sidebar (kecil transparan) -->
+  <div id="sidebarToggle" title="Buka panel"></div>
+
+  <!-- Panel Sidebar -->
+  <div id="sidebarPanel">
+    <div class="sidebar-header">
+      <h3>Info / Menu</h3>
+      <button id="sidebarClose">×</button>
+    </div>
+    <div class="sidebar-content">
+      <!-- ============================== -->
+      <!--  ISI SENDIRI DI SINI NANTI     -->
+      <!--  Bisa link, teks, gambar, dll  -->
+      <!-- ============================== -->
+      <div class="placeholder">
+        Tempat konten sidebar.<br><br>
+        Kamu bisa ganti bagian ini dengan link, teks, atau apa saja yang kamu mau.
+      </div>
+    </div>
   </div>
 
   <!-- Video Player -->
@@ -190,20 +299,14 @@
     </div>
   </div>
 
-  <noscript>
-    <div id="noscriptWarning">
-      <h2>JavaScript diperlukan</h2>
-      <p>Aktifkan JavaScript untuk menonton video.</p>
-    </div>
-  </noscript>
-
   <script>
-  //<![CDATA[
   (function(){
+    // ========== Ambil Parameter ==========
     var params = new URLSearchParams(window.location.search);
     var videoID = params.get("id");
     var server = params.get("ser") || "1";
 
+    // Kalau tidak ada id
     if(!videoID){
       const lastID = localStorage.getItem("lastVideoID");
       const lastSer = localStorage.getItem("lastServer") || "1";
@@ -220,10 +323,11 @@
       localStorage.setItem("lastServer", server);
     }
 
+    // Sembunyikan loading
     var loadingScreen = document.getElementById("loadingScreen");
     if(loadingScreen) loadingScreen.style.display = "none";
 
-    let videoSrc = "";
+    // Decode server
     function decodeBase64(str){
       try { return atob(str); }
       catch(e){ return "https://cdn2.videy.co/"; }
@@ -237,25 +341,94 @@
     };
 
     const baseDomain = decodeBase64(serverList[server] || serverList["1"]);
-    videoSrc = `${baseDomain}${videoID}.mp4`;
+    const videoSrc = `${baseDomain}${videoID}.mp4`;
 
-    var videoMode = document.getElementById("videoMode");
-    var video = document.getElementById("blogVideo");
-    var play = document.getElementById("playButton");
-    var clickArea = document.querySelector(".video-click");
-    var progressArea = document.querySelector(".progress-area");
-    var progressFill = document.querySelector(".progress-fill");
+    // Element
+    var videoMode   = document.getElementById("videoMode");
+    var video       = document.getElementById("blogVideo");
+    var playBtn     = document.getElementById("playButton");
+    var clickArea   = document.querySelector(".video-click");
+    var progressArea= document.querySelector(".progress-area");
+    var progressFill= document.querySelector(".progress-fill");
     var closeButton = document.getElementById("closeButton");
 
+    // Tampilkan player (tapi belum load video)
     document.body.style.overflow = "hidden";
-    document.querySelectorAll("body > *:not(#videoMode)").forEach(function(el){
-      if(el.id !== "loadingScreen" && el.id !== "noscriptWarning"){
-        el.style.display = "none";
+    videoMode.style.display = "flex";
+
+    // ========== PENTING: Video TIDAK di-load dulu ==========
+    // video.src = videoSrc;  ← dihapus
+    // Video baru di-set saat user klik Play
+
+    let isVideoLoaded = false;
+
+    function loadAndPlayVideo() {
+      if (!isVideoLoaded) {
+        video.src = videoSrc;
+        video.load();
+        isVideoLoaded = true;
       }
+      video.play().catch(function(){});
+    }
+
+    // ========== Kontrol Video ==========
+    playBtn.onclick = function() {
+      loadAndPlayVideo();
+    };
+
+    clickArea.onclick = function() {
+      if (!isVideoLoaded) {
+        loadAndPlayVideo();
+        return;
+      }
+      if (video.paused) {
+        video.play();
+      } else {
+        video.pause();
+      }
+    };
+
+    video.onplay = function() {
+      playBtn.style.display = "none";
+    };
+
+    video.onpause = function() {
+      playBtn.style.display = "flex";
+    };
+
+    video.ontimeupdate = function() {
+      if (video.duration) {
+        progressFill.style.width = (video.currentTime / video.duration * 100) + "%";
+      }
+    };
+
+    progressArea.onclick = function(e) {
+      if (!isVideoLoaded) return;
+      var rect = progressArea.getBoundingClientRect();
+      var pos = (e.clientX - rect.left) / rect.width;
+      video.currentTime = pos * video.duration;
+    };
+
+    closeButton.onclick = function() {
+      history.back();
+    };
+
+    // ========== Sidebar Logic ==========
+    const sidebarToggle = document.getElementById("sidebarToggle");
+    const sidebarPanel  = document.getElementById("sidebarPanel");
+    const sidebarClose  = document.getElementById("sidebarClose");
+
+    sidebarToggle.addEventListener("click", function() {
+      sidebarPanel.classList.add("open");
+      sidebarToggle.style.display = "none";
     });
 
-    videoMode.style.display = "flex";
-    video.src = videoSrc;
+    sidebarClose.addEventListener("click", function() {
+      sidebarPanel.classList.remove("open");
+      setTimeout(function() {
+        sidebarToggle.style.display = "flex";
+      }, 300);
+    });
 
     // ========== Proteksi ==========
     function enableVideoProtection(){
@@ -278,70 +451,10 @@
       document.addEventListener('copy', e => e.preventDefault());
       document.addEventListener('cut', e => e.preventDefault());
       document.addEventListener('paste', e => e.preventDefault());
-
-      let devtoolsOpen = false;
-      const threshold = 160;
-      setInterval(() => {
-        if(window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold){
-          if(!devtoolsOpen){
-            devtoolsOpen = true;
-            if(video) video.pause();
-            showAntiInspectWarning();
-          }
-        } else {
-          devtoolsOpen = false;
-        }
-      }, 600);
-
-      function showAntiInspectWarning(){
-        const warn = document.createElement('div');
-        warn.style.cssText = `
-          position:fixed;top:0;left:0;width:100%;height:100vh;
-          background:rgba(0,0,0,0.97);color:#ff4444;z-index:9999999;
-          display:flex;align-items:center;justify-content:center;
-          flex-direction:column;font-family:Arial,sans-serif;text-align:center;
-        `;
-        warn.innerHTML = `
-          <h2>🚫 Akses Terlarang</h2>
-          <p>Developer Tools terdeteksi.<br>Video di-pause untuk keamanan.</p>
-          <button onclick="this.parentElement.remove()" 
-            style="margin-top:20px;padding:12px 25px;font-size:16px;
-                   background:#fff;color:#000;border:none;border-radius:6px;cursor:pointer;">
-            Tutup & Lanjutkan
-          </button>
-        `;
-        document.body.appendChild(warn);
-      }
     }
     enableVideoProtection();
 
-    // ========== Kontrol Video ==========
-    play.onclick = function(){ video.play(); };
-
-    clickArea.onclick = function(){
-      if(video.paused) video.play();
-      else video.pause();
-    };
-
-    video.onplay = function(){ play.style.display = "none"; };
-    video.onpause = function(){ play.style.display = "flex"; };
-
-    video.ontimeupdate = function(){
-      if(video.duration){
-        progressFill.style.width = (video.currentTime / video.duration * 100) + "%";
-      }
-    };
-
-    progressArea.onclick = function(e){
-      var rect = progressArea.getBoundingClientRect();
-      var pos = (e.clientX - rect.left) / rect.width;
-      video.currentTime = pos * video.duration;
-    };
-
-    closeButton.onclick = function(){
-      history.back();
-    };
-
+    // ========== No Video ==========
     function showNoVideoInfo(){
       const infoDiv = document.createElement("div");
       infoDiv.style.cssText = `
@@ -359,7 +472,6 @@
       document.body.appendChild(infoDiv);
     }
   })();
-  //]]>
   </script>
 </body>
 </html>
