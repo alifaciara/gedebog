@@ -117,7 +117,7 @@
       margin-left: 6px;
     }
 
-    /* Progress Bar + Time (dinaikkan) */
+    /* Progress Bar + Time */
     .progress-container {
       position: absolute;
       bottom: 28px;
@@ -128,6 +128,15 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
+      opacity: 1;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      transform: translateY(0);
+    }
+
+    .progress-container.hidden {
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
     }
 
     .progress-area {
@@ -181,7 +190,7 @@
     /* Sidebar Toggle */
     #sidebarToggle {
       position: fixed;
-      left: 0px;
+      left: 12px;
       top: 50%;
       transform: translateY(-50%);
       width: 28px;
@@ -310,7 +319,7 @@
       <div id="playButton"></div>
 
       <!-- Progress + Time -->
-      <div class="progress-container">
+      <div class="progress-container" id="progressContainer">
         <div class="progress-area">
           <div class="progress-fill"></div>
         </div>
@@ -363,26 +372,39 @@
     const baseDomain = decodeBase64(serverList[server] || serverList["1"]);
     const videoSrc = `${baseDomain}${videoID}.mp4`;
 
-    var videoMode    = document.getElementById("videoMode");
-    var video        = document.getElementById("blogVideo");
-    var playBtn      = document.getElementById("playButton");
-    var clickArea    = document.querySelector(".video-click");
-    var progressArea = document.querySelector(".progress-area");
-    var progressFill = document.querySelector(".progress-fill");
-    var closeButton  = document.getElementById("closeButton");
-    var currentTimeEl= document.getElementById("currentTime");
-    var totalTimeEl  = document.getElementById("totalTime");
+    var videoMode         = document.getElementById("videoMode");
+    var video             = document.getElementById("blogVideo");
+    var playBtn           = document.getElementById("playButton");
+    var clickArea         = document.querySelector(".video-click");
+    var progressArea      = document.querySelector(".progress-area");
+    var progressFill      = document.querySelector(".progress-fill");
+    var progressContainer = document.getElementById("progressContainer");
+    var closeButton       = document.getElementById("closeButton");
+    var currentTimeEl     = document.getElementById("currentTime");
+    var totalTimeEl       = document.getElementById("totalTime");
 
     document.body.style.overflow = "hidden";
     videoMode.style.display = "flex";
 
     let isVideoLoaded = false;
+    let hideControlsTimeout = null;
 
     function formatTime(seconds) {
       if (isNaN(seconds) || !isFinite(seconds)) return "00:00";
       const m = Math.floor(seconds / 60);
       const s = Math.floor(seconds % 60);
       return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function showControls() {
+      progressContainer.classList.remove("hidden");
+      clearTimeout(hideControlsTimeout);
+
+      if (!video.paused) {
+        hideControlsTimeout = setTimeout(() => {
+          progressContainer.classList.add("hidden");
+        }, 2500);
+      }
     }
 
     function loadAndPlayVideo() {
@@ -412,20 +434,29 @@
       }
     };
 
+    // Auto hide controls
     video.onplay = function() {
       playBtn.style.display = "none";
+      showControls();
     };
 
     video.onpause = function() {
       playBtn.style.display = "flex";
+      showControls();
+      clearTimeout(hideControlsTimeout);
     };
 
-    // Saat metadata siap → tampilkan total durasi
+    // Mouse / touch di area video → tampilkan controls
+    clickArea.addEventListener("mousemove", showControls);
+    clickArea.addEventListener("touchstart", showControls);
+    progressArea.addEventListener("click", showControls);
+
+    // Metadata siap
     video.onloadedmetadata = function() {
       totalTimeEl.textContent = formatTime(video.duration);
     };
 
-    // Update progress + waktu berjalan
+    // Update progress + waktu
     video.ontimeupdate = function() {
       if (video.duration) {
         progressFill.style.width = (video.currentTime / video.duration * 100) + "%";
@@ -433,12 +464,13 @@
       }
     };
 
-    // Seek progress
+    // Seek
     progressArea.onclick = function(e) {
       if (!isVideoLoaded) return;
       var rect = progressArea.getBoundingClientRect();
       var pos = (e.clientX - rect.left) / rect.width;
       video.currentTime = pos * video.duration;
+      showControls();
     };
 
     closeButton.onclick = function() {
